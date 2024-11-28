@@ -260,6 +260,7 @@ async function completarTarea(req, res) {
   }
 }
 
+// Obtener las tareas de la brigada con los estudiantes incluidos
 async function getTareasPorBrigada(req, res) {
   const { usuario_id, periodoAcademico } = req.query;
 
@@ -272,6 +273,7 @@ async function getTareasPorBrigada(req, res) {
     const db = dbConection.get();
     const usuariosCollection = db.db('Usuarios').collection('data');
     const tareasCollection = db.db('Tareas').collection('data');
+    const brigadasCollection = db.db('Brigadas').collection('data');
 
     // Verificar si el usuario existe
     const usuario = await usuariosCollection.findOne({ usuario_id });
@@ -288,7 +290,19 @@ async function getTareasPorBrigada(req, res) {
     const tareas = await tareasCollection.find({
       brigada_id: { $in: usuario.brigadas },
       periodoAcademico: periodoAcademico
-    }).project({ tarea_id: 1, brigada_id: 1, descripcion: 1, fecha: 1, estado: 1, periodoAcademico: 1, _id: 0 }).toArray();
+    }).toArray();
+
+    // Agregar lista de asistentes para cada tarea
+    for (let tarea of tareas) {
+      const brigada = await brigadasCollection.findOne({ brigada_id: tarea.brigada_id, periodoAcademico });
+      if (brigada) {
+        const estudiantes = await usuariosCollection.find({ usuario_id: { $in: brigada.usuarios } })
+          .project({ nombre: 1, usuario_id: 1, _id: 0 }).toArray();
+        tarea.listaAsistentes = estudiantes;
+      } else {
+        tarea.listaAsistentes = [];
+      }
+    }
 
     res.status(200).json(tareas);
   } catch (error) {
