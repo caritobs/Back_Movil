@@ -9,9 +9,9 @@ const routes = require('./routes/routes');
 app.use(cors());
 app.options('*', cors()); // Esto es necesario para manejar las peticiones OPTIONS
 
-// Configuración de body-parser
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Configuración de body-parser con límites aumentados
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Rutas
 app.use('', routes);
