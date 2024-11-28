@@ -288,7 +288,7 @@ async function getTareasPorBrigada(req, res) {
     const tareas = await tareasCollection.find({
       brigada_id: { $in: usuario.brigadas },
       periodoAcademico: periodoAcademico
-    }).project({ tarea_id: 1, brigada_id: 1, descripcion: 1, fecha: 1, estado: 1, _id: 0 }).toArray();
+    }).project({ tarea_id: 1, brigada_id: 1, descripcion: 1, fecha: 1, estado: 1, periodoAcademico: 1, _id: 0 }).toArray();
 
     res.status(200).json(tareas);
   } catch (error) {
